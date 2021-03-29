@@ -41,6 +41,15 @@ class VinylGetterParser extends PropertyAccessorParser {
     if (annotation == null) return null;
     return BuilderAnnotationParser._(annotation);
   }
+
+  bool hasLazyAnnotation() =>
+      const TypeChecker.fromRuntime(Lazy).hasAnnotationOf(element);
+
+  bool hasGetterAnnotation() =>
+      const TypeChecker.fromRuntime(Getter).hasAnnotationOf(element);
+
+  bool hasBuilderAnnotation() =>
+      const TypeChecker.fromRuntime(Builder).hasAnnotationOf(element);
 }
 
 class BuilderAnnotationParser {

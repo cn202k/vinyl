@@ -29,7 +29,7 @@ mixin User<T extends W> implements Interface<T> {
 
   List<String>? get favs;
 
-  @getter
+  @lazy
   int get sum => size * 2;
 
   UserBuilder<T> toBuilder();

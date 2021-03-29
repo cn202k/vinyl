@@ -5,6 +5,7 @@ import 'package:vinyl/vinyl.dart';
 import 'package:vinyl_generator/src/inflater.dart';
 import 'package:vinyl_generator/src/parser/vinyl_class_parser.dart';
 import 'package:vinyl_generator/src/transformer.dart';
+import 'package:vinyl_generator/src/validator.dart';
 
 class VinylGenerator extends GeneratorForAnnotation<Vinyl> {
   @override
@@ -19,6 +20,7 @@ class VinylGenerator extends GeneratorForAnnotation<Vinyl> {
         element: element,
       );
     }
-    return inflate(transform(VinylClassParser.from(element)!));
+    final parser = VinylClassParser.from(element)!;
+    return inflate(transform(validate(parser)));
   }
 }

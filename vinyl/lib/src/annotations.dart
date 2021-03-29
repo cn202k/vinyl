@@ -10,6 +10,10 @@ class Getter {
   const Getter._();
 }
 
+class Lazy {
+  const Lazy._();
+}
+
 class Builder {
   final Type klass;
   final String toBuilderMethod;
@@ -24,3 +28,4 @@ class Builder {
 
 const vinyl = Vinyl();
 const getter = Getter._();
+const lazy = Lazy._();

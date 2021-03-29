@@ -13,11 +13,15 @@ class ConcreteClassTemplate {
       ..name = name()
       ..types.addAll(model.typeParameters.map((it) => refer('$it')))
       ..constructors.add(constructor())
-      ..fields.addAll(fields())
+      ..fields.addAll([
+        ...fields(),
+        ...lazyFields().map((it) => it.inflateField()),
+      ])
       ..methods.addAll([
         _EqualsMethod(model).inflate(),
         _HashCodeMethod(model).inflate(),
         _ToStringMethod(model).inflate(),
+        ...lazyFields().map((it) => it.inflateGetter()),
       ]);
     if (model.meta.shouldGenerateBuilder)
       klass.methods.add(toBuilderMethod());
@@ -31,6 +35,9 @@ class ConcreteClassTemplate {
     }
     return klass.build();
   }
+
+  Iterable<_LazyField> lazyFields() =>
+      model.lazyProperties.map((it) => _LazyField(it));
 
   Reference supertype() =>
       refer(model.typeParameters.parameterize(model.name));
@@ -123,6 +130,50 @@ class _ToStringMethod {
         .map((it) => '${it.name}: \$${it.name}')
         .join(', ');
     return Code("'${model.name}($values)'");
+  }
+}
+
+// @override
+// int get sum => (_sum == vinyl ? (_sum = super.sum) : _sum) as int;
+
+// dynamic _sum = vinyl;
+
+class _LazyField {
+  final LazyProperty model;
+
+  _LazyField(this.model);
+
+  Method inflateGetter() {
+    final method = MethodBuilder()
+      ..name = model.name
+      ..returns = refer(getterReturnType())
+      ..annotations.add(refer('override'))
+      ..lambda = true
+      ..type = MethodType.getter
+      ..body = getterBodyCode();
+    return method.build();
+  }
+
+  Field inflateField() {
+    final field = FieldBuilder()
+      ..name = fieldName()
+      ..type = refer('dynamic')
+      ..assignment = Code('vinyl');
+    return field.build();
+  }
+
+  String fieldName() => '_${model.name}';
+
+  String getterReturnType() => model.typeSource;
+
+// (_sum == vinyl ? (_sum = super.sum) : _sum) as int
+  Code getterBodyCode() {
+    final retType = getterReturnType();
+    final field = fieldName();
+    final supField = 'super.${model.name}';
+    return Code(
+      '($field == vinyl ? ($field = $supField) : $field) as $retType',
+    );
   }
 }
 

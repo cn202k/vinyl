@@ -21,6 +21,11 @@ class ClassParser {
         },
       );
 
+  bool hasUnnamedDefaultConstructor() {
+    final ConstructorElement? ctor = element.unnamedConstructor;
+    return ctor != null && ctor.parameters.isEmpty;
+  }
+
   Iterable<PropertyAccessorParser> explicitGetters() => element.accessors
       .where((it) => it.isGetter && !it.isSynthetic)
       .map((it) => PropertyAccessorParser(it));

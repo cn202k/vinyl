@@ -41,6 +41,8 @@ class _$User<T extends W> with User<T> {
   @override
   final List<String>? favs;
 
+  dynamic _sum = vinyl;
+
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
@@ -79,6 +81,8 @@ class _$User<T extends W> with User<T> {
   @override
   String toString() =>
       'User(id: $id, gomgom: $gomgom, name: $name, mail: $mail, age: $age, size: $size, foo: $foo, favs: $favs)';
+  @override
+  int get sum => (_sum == vinyl ? (_sum = super.sum) : _sum) as int;
   @override
   UserBuilder<T> toBuilder() =>
       UserBuilder<T>(id, gomgom, name, mail, age, size, foo, favs);

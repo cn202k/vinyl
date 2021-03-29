@@ -13,6 +13,7 @@ DataType transform(VinylClassParser klass) => DataType(
             ),
           ),
       properties: _properties(klass),
+      lazyProperties: _lazyProperties(klass),
       meta: _meta(klass),
     );
 
@@ -26,12 +27,17 @@ DataTypeMeta _meta(VinylClassParser klass) => DataTypeMeta(
 bool _shouldGenerateBuilder(VinylClassParser klass) =>
     klass.hasMethod(klass.annotation.toBuilderMethod);
 
-Iterable<Property> _properties(VinylClassParser klass) => klass
-    .allExplicitGetters()
-    .where((it) => !it.hasAnnotationOf(
-          const TypeChecker.fromRuntime(Getter),
-        ))
-    .map(_property);
+Iterable<Property> _properties(VinylClassParser klass) =>
+    klass.allExplicitGetters().where(_isProperty).map(_property);
+
+Iterable<LazyProperty> _lazyProperties(VinylClassParser klass) =>
+    klass.allExplicitGetters().where(_isLazyProperty).map(_lazyProperty);
+
+bool _isProperty(VinylGetterParser getter) =>
+    !getter.hasGetterAnnotation() && !getter.hasLazyAnnotation();
+
+bool _isLazyProperty(VinylGetterParser getter) =>
+    getter.hasLazyAnnotation();
 
 Property _property(VinylGetterParser getter) => Property(
       name: getter.name(),
@@ -43,6 +49,11 @@ Property _property(VinylGetterParser getter) => Property(
       isNullable: getter.returnType().isNullable(),
       hasDefaultValue: !getter.isAbstract(),
       builder: _propertyBuilder(getter),
+    );
+
+LazyProperty _lazyProperty(VinylGetterParser getter) => LazyProperty(
+      name: getter.name(),
+      typeSource: getter.returnType().source(),
     );
 
 PropertyBuilder? _propertyBuilder(VinylGetterParser getter) {

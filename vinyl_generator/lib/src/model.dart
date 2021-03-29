@@ -2,12 +2,14 @@ class DataType {
   final String name;
   final Iterable<TypeParameter> typeParameters;
   final Iterable<Property> properties;
+  final Iterable<LazyProperty> lazyProperties;
   final DataTypeMeta meta;
 
   DataType({
     required this.name,
     required this.typeParameters,
     required this.properties,
+    required this.lazyProperties,
     required this.meta,
   });
 }
@@ -24,10 +26,7 @@ class DataTypeMeta {
   });
 }
 
-enum InterfaceType {
-  Mixin,
-  Class,
-}
+enum InterfaceType { Mixin, Class }
 
 class TypeParameter {
   final String name;
@@ -66,6 +65,16 @@ extension TypeArguments on Iterable<TypeArgument> {
     final params = this.map((it) => it.name).join(', ');
     return '$baseName<$params>';
   }
+}
+
+class LazyProperty {
+  final String name;
+  final String typeSource;
+
+  LazyProperty({
+    required this.name,
+    required this.typeSource,
+  });
 }
 
 class Property {
