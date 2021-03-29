@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      vinyl|vinyl_generator:
+        enabled: true
+
+builders:
+  vinyl:
+    import: "package:vinyl_generator/vinyl_generator.dart"
+    builder_factories: ["vinyl_generator"]
+    build_extensions: {".dart": [".vinyl.part"]}
+    auto_apply: dependents
+    build_to: source 
+    applies_builders: ["source_gen|combining_builder"]
+    
