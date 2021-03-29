@@ -5,3 +5,4 @@ TODO
 - [ ] Code refactoring
 - [ ] Support union type
 - [ ] Support `json_serialization`
+- [ ] Support `BuiltCollection`s
