@@ -17,6 +17,7 @@ class ConcreteClassTemplate {
       ..methods.addAll([
         _EqualsMethod(model).inflate(),
         _HashCodeMethod(model).inflate(),
+        _ToStringMethod(model).inflate(),
       ]);
     if (model.meta.shouldGenerateBuilder)
       klass.methods.add(toBuilderMethod());
@@ -95,6 +96,33 @@ class ConcreteClassTemplate {
     //     ..required = true;
     // }
     return param.build();
+  }
+}
+
+class _ToStringMethod {
+  final DataType model;
+
+  _ToStringMethod(this.model);
+
+  Method inflate() {
+    final method = MethodBuilder()
+      ..name = name()
+      ..returns = returnType()
+      ..annotations.add(refer('override'))
+      ..lambda = true
+      ..body = bodyCode();
+    return method.build();
+  }
+
+  String name() => 'toString';
+
+  Reference returnType() => refer('String');
+
+  Code bodyCode() {
+    final values = model.properties
+        .map((it) => '${it.name}: \$${it.name}')
+        .join(', ');
+    return Code("'${model.name}($values)'");
   }
 }
 

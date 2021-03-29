@@ -6,14 +6,22 @@ part of 'user.dart';
 // VinylGenerator
 // **************************************************************************
 
-class _$User<T> with User<T> {
+class _$User<T extends W> with User<T> {
   _$User(
-      {required this.name,
+      {required this.id,
+      required this.gomgom,
+      required this.name,
       required this.mail,
       required this.age,
       required this.size,
       required this.foo,
       required this.favs});
+
+  @override
+  final T id;
+
+  @override
+  final Map<int, List<int>> gomgom;
 
   @override
   final String name;
@@ -37,6 +45,10 @@ class _$User<T> with User<T> {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is User<T> &&
+            (identical(other.id, id) ||
+                const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.gomgom, gomgom) ||
+                const DeepCollectionEquality().equals(other.gomgom, gomgom)) &&
             (identical(other.name, name) ||
                 const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.mail, mail) ||
@@ -55,6 +67,8 @@ class _$User<T> with User<T> {
   @override
   int get hashCode =>
       runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(gomgom) ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(mail) ^
       const DeepCollectionEquality().hash(age) ^
@@ -63,13 +77,18 @@ class _$User<T> with User<T> {
       const DeepCollectionEquality().hash(favs) ^
       super.hashCode;
   @override
+  String toString() =>
+      'User(id: $id, gomgom: $gomgom, name: $name, mail: $mail, age: $age, size: $size, foo: $foo, favs: $favs)';
+  @override
   UserBuilder<T> toBuilder() =>
-      UserBuilder<T>(name, mail, age, size, foo, favs);
+      UserBuilder<T>(id, gomgom, name, mail, age, size, foo, favs);
 }
 
 extension UserFactory on Vinyl {
-  User<T> user<T>(
-      {required String name,
+  User<T> user<T extends W>(
+      {required T id,
+      required Map<int, List<int>> gomgom,
+      required String name,
       required String mail,
       int? age,
       int? size,
@@ -77,6 +96,8 @@ extension UserFactory on Vinyl {
       required List<String>? favs}) {
     final defaultUser = _$DefaultUser<T>();
     return _$User(
+        id: id,
+        gomgom: gomgom,
         name: name,
         mail: mail,
         age: age ?? defaultUser.age,
@@ -86,7 +107,11 @@ extension UserFactory on Vinyl {
   }
 }
 
-class _$DefaultUser<T> with User<T> {
+class _$DefaultUser<T extends W> with User<T> {
+  @override
+  Never get id => throw UnimplementedError();
+  @override
+  Never get gomgom => throw UnimplementedError();
   @override
   Never get name => throw UnimplementedError();
   @override
@@ -103,9 +128,14 @@ class _$DefaultUser<T> with User<T> {
   Never toBuilder() => throw UnimplementedError();
 }
 
-class UserBuilder<T> implements DataBuilder<User<T>> {
-  UserBuilder(this.name, this.mail, this.age, this.size, Foo<T>? foo, this.favs)
+class UserBuilder<T extends W> implements DataBuilder<User<T>> {
+  UserBuilder(this.id, this.gomgom, this.name, this.mail, this.age, this.size,
+      Foo<T>? foo, this.favs)
       : foo = foo?.toBuilder();
+
+  T id;
+
+  Map<int, List<int>> gomgom;
 
   String name;
 
@@ -120,6 +150,8 @@ class UserBuilder<T> implements DataBuilder<User<T>> {
   List<String>? favs;
 
   set source(User<T> value) {
+    id = value.id;
+    gomgom = value.gomgom;
     name = value.name;
     mail = value.mail;
     age = value.age;
@@ -130,6 +162,8 @@ class UserBuilder<T> implements DataBuilder<User<T>> {
 
   @override
   User<T> build() => _$User<T>(
+      id: id,
+      gomgom: gomgom,
       name: name,
       mail: mail,
       age: age,

@@ -25,20 +25,11 @@ class VinylClassParser extends ClassParser {
   VinylClassParser._(
     ClassElement element,
     this.annotation,
-  ) : super(element) {
-    print(
-        '#${element.name} ${allUserDefinedGetters().map((it) => it.name())}');
-  }
+  ) : super(element);
 
-  @override
-  Iterable<VinylGetterParser> userDefinedGetters() => super
-      .userDefinedGetters()
-      .map((it) => VinylGetterParser._(it.element));
-
-  @override
-  Iterable<VinylGetterParser> allUserDefinedGetters() => super
-      .allUserDefinedGetters()
-      .map((it) => VinylGetterParser._(it.element));
+  Iterable<VinylGetterParser> allExplicitGetters() =>
+      lookUpAllExplicitGetters(accessibleFrom: element.library)
+          .map((it) => VinylGetterParser._(it.element));
 }
 
 class VinylGetterParser extends PropertyAccessorParser {

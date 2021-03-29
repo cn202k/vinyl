@@ -1,4 +1,6 @@
 import 'package:vinyl/vinyl.dart';
+
+import 'example.dart';
 part 'user.vinyl.dart';
 
 class Foo<T> {
@@ -9,8 +11,14 @@ class FooBuilder<T> {
   Foo<T> build() => Foo();
 }
 
+abstract class Interface<T> extends GomGom<int> {
+  T get id;
+}
+
+class W {}
+
 @Vinyl(toBuilderMethod: 'toBuilder')
-mixin User<T> {
+mixin User<T extends W> implements Interface<T> {
   String get name;
   String get mail;
   int? get age => 0;

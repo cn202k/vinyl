@@ -27,7 +27,7 @@ bool _shouldGenerateBuilder(VinylClassParser klass) =>
     klass.hasMethod(klass.annotation.toBuilderMethod);
 
 Iterable<Property> _properties(VinylClassParser klass) => klass
-    .allUserDefinedGetters()
+    .allExplicitGetters()
     .where((it) => !it.hasAnnotationOf(
           const TypeChecker.fromRuntime(Getter),
         ))

@@ -21,22 +21,21 @@ class ClassParser {
         },
       );
 
-  Iterable<PropertyAccessorParser> userDefinedGetters() => element.fields
-      .map((it) => it.getter as PropertyAccessorElement?)
-      .whereType<PropertyAccessorElement>()
-      .where((it) => !it.isSynthetic)
+  Iterable<PropertyAccessorParser> explicitGetters() => element.accessors
+      .where((it) => it.isGetter && !it.isSynthetic)
       .map((it) => PropertyAccessorParser(it));
 
-  Iterable<PropertyAccessorParser> allUserDefinedGetters() {
+  Iterable<PropertyAccessorParser> lookUpAllExplicitGetters(
+      {required LibraryElement accessibleFrom}) {
     final getters = <String, PropertyAccessorParser>{};
-    supertypes().forEach((sup) {
-      sup.definition().allUserDefinedGetters().forEach((getter) {
-        getters[getter.name()] = getter;
-      });
-    });
-    userDefinedGetters().forEach((getter) {
+    for (final supertype in supertypes()) {
+      supertype
+          .lookUpAllExplicitGetters(accessibleFrom: accessibleFrom)
+          .forEach((getter) => getters[getter.name()] = getter);
+    }
+    for (final getter in explicitGetters()) {
       getters[getter.name()] = getter;
-    });
+    }
     return getters.values;
   }
 
@@ -51,7 +50,7 @@ class ClassParser {
   }
 
   bool hasMethod(String name) =>
-      element.lookUpMethod(name, element.library) != null;
+      element.methods.where((it) => it.name == name).isNotEmpty;
 
   DartObject? firstAnnotationOf(TypeChecker typeChecker) =>
       typeChecker.firstAnnotationOf(element);
