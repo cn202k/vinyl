@@ -19,6 +19,8 @@ class W {}
 
 @Vinyl(toBuilderMethod: 'toBuilder')
 mixin User<T extends W> implements Interface<T> {
+  static final of = newUser;
+
   String get name;
   String get mail;
   int? get age => 0;

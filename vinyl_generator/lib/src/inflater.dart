@@ -9,7 +9,8 @@ final _emitter = DartEmitter();
 
 String inflate(DataType model) => <Spec>[
       ConcreteClassTemplate(model).inflate(),
-      FactoryExtensionTemplate(model).inflate(),
+      // FactoryExtensionTemplate(model).inflate(),
+      FactoryMethod(model).inflate(),
       if (model.properties.any((it) => it.hasDefaultValue))
         DefaulClassTemplate(model).inflate(),
       if (model.meta.shouldGenerateBuilder)

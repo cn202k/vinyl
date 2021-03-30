@@ -24,11 +24,7 @@ class FactoryMethod {
 
   FactoryMethod(this.model);
 
-  String name() {
-    final base = model.name;
-    if (base.length < 2) return base;
-    return base[0].toLowerCase() + base.substring(1);
-  }
+  String name() => 'new${model.name}';
 
   Reference returnType() =>
       refer(model.typeParameters.parameterize(model.name));
@@ -52,20 +48,16 @@ class FactoryMethod {
     return param.build();
   }
 
+  String constructorArgumentCode(Property property) =>
+      '${property.name}: ${property.name}';
+
+  String constructorArgumentsCode() =>
+      model.properties.map(constructorArgumentCode).join(', ');
+
   Code bodyCode() {
     final concreteClass = ConcreteClassTemplate(model).name();
-    final defaultClass = model.typeParameters
-        .parameterize(DefaulClassTemplate(model).name());
-    final def = 'default${model.name}';
-    final args = model.properties
-        .map((it) => it.hasDefaultValue
-            ? '${it.name}: ${it.name} ?? $def.${it.name}'
-            : '${it.name} : ${it.name}')
-        .join(', ');
-    return Code('''
-    final $def = $defaultClass();
-    return $concreteClass($args);
-    ''');
+    final args = constructorArgumentsCode();
+    return Code('$concreteClass($args);');
   }
 
   Method inflate() {
@@ -74,26 +66,8 @@ class FactoryMethod {
       ..returns = returnType()
       ..types.addAll(typeParameters())
       ..optionalParameters.addAll(parameters())
+      ..lambda = true
       ..body = bodyCode();
     return method.build();
   }
 }
-
-/*
-
-extension UserFactory on Vinyl {
-  User user<T extends Foo>({
-    required String name,
-    required String mail,
-    required T foo,
-    required List<String>? favs,
-  }) =>
-      _$User(
-        name: name,
-        mail: mail,
-        foo: foo,
-        favs: favs,
-      );
-}
-
-*/

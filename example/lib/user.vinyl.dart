@@ -7,7 +7,7 @@ part of 'user.dart';
 // **************************************************************************
 
 class _$User<T extends W> with User<T> {
-  _$User(
+  _$User._(
       {required this.id,
       required this.gomgom,
       required this.name,
@@ -16,6 +16,27 @@ class _$User<T extends W> with User<T> {
       required this.size,
       required this.foo,
       required this.favs});
+
+  factory _$User(
+      {required T id,
+      required Map<int, List<int>> gomgom,
+      required String name,
+      required String mail,
+      int? age,
+      int? size,
+      required Foo<T>? foo,
+      required List<String>? favs}) {
+    final defaultUser = _$DefaultUser<T>();
+    return _$User._(
+        id: id,
+        gomgom: gomgom,
+        name: name,
+        mail: mail,
+        age: age ?? defaultUser.age,
+        size: size ?? defaultUser.size,
+        foo: foo,
+        favs: favs);
+  }
 
   @override
   final T id;
@@ -88,28 +109,24 @@ class _$User<T extends W> with User<T> {
       UserBuilder<T>(id, gomgom, name, mail, age, size, foo, favs);
 }
 
-extension UserFactory on Vinyl {
-  User<T> user<T extends W>(
-      {required T id,
-      required Map<int, List<int>> gomgom,
-      required String name,
-      required String mail,
-      int? age,
-      int? size,
-      required Foo<T>? foo,
-      required List<String>? favs}) {
-    final defaultUser = _$DefaultUser<T>();
-    return _$User(
+User<T> newUser<T extends W>(
+        {required T id,
+        required Map<int, List<int>> gomgom,
+        required String name,
+        required String mail,
+        int? age,
+        int? size,
+        required Foo<T>? foo,
+        required List<String>? favs}) =>
+    _$User(
         id: id,
         gomgom: gomgom,
         name: name,
         mail: mail,
-        age: age ?? defaultUser.age,
-        size: size ?? defaultUser.size,
+        age: age,
+        size: size,
         foo: foo,
         favs: favs);
-  }
-}
 
 class _$DefaultUser<T extends W> with User<T> {
   @override

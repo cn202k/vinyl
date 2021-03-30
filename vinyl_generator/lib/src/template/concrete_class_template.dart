@@ -12,7 +12,6 @@ class ConcreteClassTemplate {
     final klass = ClassBuilder()
       ..name = name()
       ..types.addAll(model.typeParameters.map((it) => refer('$it')))
-      ..constructors.add(constructor())
       ..fields.addAll([
         ...fields(),
         ...lazyFields().map((it) => it.inflateField()),
@@ -23,8 +22,19 @@ class ConcreteClassTemplate {
         _ToStringMethod(model).inflate(),
         ...lazyFields().map((it) => it.inflateGetter()),
       ]);
-    if (model.meta.shouldGenerateBuilder)
+    if (model.meta.shouldGenerateBuilder) {
       klass.methods.add(toBuilderMethod());
+    }
+    if (model.properties.any((it) => it.hasDefaultValue)) {
+      klass.constructors.addAll([
+        _Constructor(model, private: true).infalte(),
+        _FactoryConstructor(model).inflate(),
+      ]);
+    } else {
+      klass.constructors.add(
+        _Constructor(model, private: false).infalte(),
+      );
+    }
     switch (model.meta.interfaceType) {
       case InterfaceType.Class:
         klass.extend = supertype();
@@ -72,21 +82,28 @@ class ConcreteClassTemplate {
     return method.build();
   }
 
-  Constructor constructor() {
-    final ctor = ConstructorBuilder()
-      ..optionalParameters
-          .addAll(model.properties.map(constructorParameter));
-    // ..initializers.addAll(model.properties
-    //     .where((it) => it.hasDefaultValue)
-    //     .map(fieldInitializer));
-    return ctor.build();
-  }
-
   Code fieldInitializer(Property property) {
     final field = property.name;
     final defaultClass = model.typeParameters
         .parameterize(DefaulClassTemplate(model).name());
     return Code('$field = $field ?? $defaultClass().$field');
+  }
+}
+
+class _Constructor {
+  final DataType model;
+  final bool private;
+
+  _Constructor(this.model, {required this.private});
+
+  String? name() => private ? '_' : null;
+
+  Constructor infalte() {
+    final ctor = ConstructorBuilder()
+      ..name = name()
+      ..optionalParameters
+          .addAll(model.properties.map(constructorParameter));
+    return ctor.build();
   }
 
   Parameter constructorParameter(Property property) {
@@ -95,14 +112,53 @@ class ConcreteClassTemplate {
       ..named = true
       ..toThis = true
       ..required = true;
-    // if (property.hasDefaultValue) {
-    //   param..type = refer(property.nullableTypeSource);
-    // } else {
-    //   param
-    //     ..toThis = true
-    //     ..required = true;
-    // }
     return param.build();
+  }
+}
+
+class _FactoryConstructor {
+  final DataType model;
+
+  _FactoryConstructor(this.model);
+
+  Constructor inflate() {
+    final ctor = ConstructorBuilder()
+      ..factory = true
+      ..optionalParameters.addAll(parameters())
+      ..body = bodyCode();
+    return ctor.build();
+  }
+
+  Iterable<Parameter> parameters() => model.properties.map(parameter);
+
+  Parameter parameter(Property property) {
+    final param = ParameterBuilder()
+      ..name = property.name
+      ..named = true;
+    if (property.hasDefaultValue) {
+      param..type = refer(property.nullableTypeSource);
+    } else {
+      param
+        ..type = refer(property.typeSource)
+        ..required = true;
+    }
+    return param.build();
+  }
+
+  Code bodyCode() {
+    final concreteClass = ConcreteClassTemplate(model).name();
+    final defaultClass = model.typeParameters
+        .parameterize(DefaulClassTemplate(model).name());
+    final def = 'default${model.name}';
+    final args = model.properties
+        .map((it) => it.hasDefaultValue
+            ? '${it.name}: ${it.name} ?? $def.${it.name}'
+            : '${it.name} : ${it.name}')
+        .join(', ');
+    return Code('''
+    final $def = $defaultClass();
+    return $concreteClass._($args);
+    ''');
   }
 }
 
