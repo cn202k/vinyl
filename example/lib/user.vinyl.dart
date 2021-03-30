@@ -149,7 +149,7 @@ class _$DefaultUser<T extends W> with User<T> {
   Never toBuilder() => throw UnimplementedError();
 }
 
-class UserBuilder<T extends W> implements DataBuilder<User<T>> {
+class UserBuilder<T extends W> implements Builder<User<T>> {
   UserBuilder(this.id, this.gomgom, this.name, this.mail, this.age, this.size,
       Foo<T>? foo, this.favs)
       : foo = foo?.toBuilder();

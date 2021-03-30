@@ -26,7 +26,7 @@ mixin User<T extends W> implements Interface<T> {
   int? get age => 0;
   int get size => 0;
 
-  @Builder(FooBuilder)
+  @Buildable(FooBuilder)
   Foo<T>? get foo;
 
   List<String>? get favs;

@@ -37,7 +37,7 @@ class VinylGetterParser extends PropertyAccessorParser {
 
   BuilderAnnotationParser? builderAnnotation() {
     final DartObject? annotation =
-        const TypeChecker.fromRuntime(Builder).firstAnnotationOf(element);
+        const TypeChecker.fromRuntime(Buildable).firstAnnotationOf(element);
     if (annotation == null) return null;
     return BuilderAnnotationParser._(annotation);
   }
@@ -49,7 +49,7 @@ class VinylGetterParser extends PropertyAccessorParser {
       const TypeChecker.fromRuntime(Getter).hasAnnotationOf(element);
 
   bool hasBuilderAnnotation() =>
-      const TypeChecker.fromRuntime(Builder).hasAnnotationOf(element);
+      const TypeChecker.fromRuntime(Buildable).hasAnnotationOf(element);
 }
 
 class BuilderAnnotationParser {

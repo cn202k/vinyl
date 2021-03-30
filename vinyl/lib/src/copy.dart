@@ -1,3 +1,3 @@
-import 'package:vinyl/src/data_builder.dart';
+import 'package:vinyl/src/builder.dart';
 
-T copy<T>(DataBuilder<T> builder) => builder.build();
+T copy<T>(Builder<T> builder) => builder.build();

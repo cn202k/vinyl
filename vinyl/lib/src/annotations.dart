@@ -14,12 +14,12 @@ class Lazy {
   const Lazy._();
 }
 
-class Builder {
+class Buildable {
   final Type klass;
   final String toBuilderMethod;
   final String buildMethod;
 
-  const Builder(
+  const Buildable(
     this.klass, {
     this.toBuilderMethod = 'toBuilder',
     this.buildMethod = 'build',
