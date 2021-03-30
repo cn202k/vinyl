@@ -45,7 +45,7 @@ class BuilderClassTemplate {
     if (model is DataSupertype) return refer(r'Builder<$T>');
     if (model is DataSubtype) {
       final typeArgs = [
-        ...typeParameters().map((it) => it.symbol),
+        ...model.type.typeParameters.map((it) => it.name),
         targetType(),
       ].join(', ');
       final supBuilder = BuilderClassTemplate(model.supertype).name();

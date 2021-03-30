@@ -6,7 +6,8 @@ part of 'result.dart';
 // VinylGenerator
 // **************************************************************************
 
-abstract class ResultBuilder<T, $T extends Result<T>> implements Builder<$T> {
+abstract class ResultBuilder<T extends num, $T extends Result<T>>
+    implements Builder<$T> {
   abstract int code;
 
   set source(covariant Result<T> value$);
@@ -14,7 +15,43 @@ abstract class ResultBuilder<T, $T extends Result<T>> implements Builder<$T> {
   $T build();
 }
 
-class _$Data<T> with Data<T> {
+extension $SealedResultApi<T extends num> on Result<T> {
+  R map<R>(
+      R Function(Data<T> value) data, R Function(Error<T> value) error) {
+    final self = this;
+    if (self is Data<T>) return data(self);
+    if (self is Error<T>) return error(self);
+    throw StateError("Unexpected type : ${self.runtimeType}");
+  }
+
+  R? match<R>(
+      {R? Function(Data<T> value)? data,
+      R? Function(Error<T> value)? error,
+      R? Function(Result<T> value)? otherwise}) {
+    final self = this;
+    if (self is Data<T>) {
+      if (data != null) return data(self);
+    } else if (self is Error<T>) {
+      if (error != null) return error(self);
+    }
+
+    return otherwise?.call(self);
+  }
+
+  bool get isData => this is Data<T>;
+  bool get isError => this is Error<T>;
+  Data<T>? get asData {
+    final self = this;
+    return self is Data<T> ? self : null;
+  }
+
+  Error<T>? get asError {
+    final self = this;
+    return self is Error<T> ? self : null;
+  }
+}
+
+class _$Data<T extends num> with Data<T> {
   _$Data({required this.code, required this.value});
 
   @override
@@ -30,7 +67,8 @@ class _$Data<T> with Data<T> {
             (identical(other.code, code) ||
                 const DeepCollectionEquality().equals(other.code, code)) &&
             (identical(other.value, value) ||
-                const DeepCollectionEquality().equals(other.value, value)) &&
+                const DeepCollectionEquality()
+                    .equals(other.value, value)) &&
             super == other);
   }
 
@@ -46,10 +84,10 @@ class _$Data<T> with Data<T> {
   DataBuilder<T> call() => DataBuilder<T>(code, value);
 }
 
-Data<T> newData<T>({required int code, required T value}) =>
+Data<T> newData<T extends num>({required int code, required T value}) =>
     _$Data(code: code, value: value);
 
-class DataBuilder<T> implements ResultBuilder<T, Data<T>> {
+class DataBuilder<T extends num> implements ResultBuilder<T, Data<T>> {
   DataBuilder(this.code, this.value);
 
   @override
@@ -67,7 +105,7 @@ class DataBuilder<T> implements ResultBuilder<T, Data<T>> {
   Data<T> build() => _$Data<T>(code: code, value: value);
 }
 
-class _$Error<T> with Error<T> {
+class _$Error<T extends num> with Error<T> {
   _$Error({required this.code, required this.message});
 
   @override
@@ -100,10 +138,11 @@ class _$Error<T> with Error<T> {
   ErrorBuilder<T> call() => ErrorBuilder<T>(code, message);
 }
 
-Error<T> newError<T>({required int code, required String message}) =>
+Error<T> newError<T extends num>(
+        {required int code, required String message}) =>
     _$Error(code: code, message: message);
 
-class ErrorBuilder<T> implements ResultBuilder<T, Error<T>> {
+class ErrorBuilder<T extends num> implements ResultBuilder<T, Error<T>> {
   ErrorBuilder(this.code, this.message);
 
   @override

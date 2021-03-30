@@ -2,7 +2,7 @@ import 'package:vinyl/vinyl.dart';
 part 'result.vinyl.dart';
 
 @vinyl
-mixin Result<T> {
+mixin Result<T extends num> {
   static final data = newData;
   static final error = newError;
 
@@ -12,14 +12,14 @@ mixin Result<T> {
 }
 
 @vinyl
-mixin Data<T> implements Result<T> {
+mixin Data<T extends num> implements Result<T> {
   T get value;
 
   DataBuilder<T> call();
 }
 
 @vinyl
-mixin Error<T> implements Result<T> {
+mixin Error<T extends num> implements Result<T> {
   String get message;
 
   ErrorBuilder<T> call();

@@ -4,6 +4,7 @@ import 'package:vinyl_generator/src/template/builder_class_template.dart';
 import 'package:vinyl_generator/src/template/concrete_class_template.dart';
 import 'package:vinyl_generator/src/template/default_class_template.dart';
 import 'package:vinyl_generator/src/template/factory_method_template.dart';
+import 'package:vinyl_generator/src/template/sealed_api_extension_template.dart';
 
 final _emitter = DartEmitter();
 
@@ -25,4 +26,6 @@ String inflate(IDataType model) => <Spec>[
       ],
       if (model.declaration.meta.shouldGenerateBuilder)
         BuilderClassTemplate(model).inflate(),
+      if (model is DataSupertype)
+        SealedApiExtensionTemplate(model).inflate(),
     ].map((it) => it.accept(_emitter).toString()).join('\n\n');
