@@ -16,18 +16,18 @@ abstract class ResultBuilder<T extends num, $T extends Result<T>>
 }
 
 extension $SealedResultApi<T extends num> on Result<T> {
-  R map<R>(
-      R Function(Data<T> value) data, R Function(Error<T> value) error) {
+  $R map<$R>(
+      $R Function(Data<T> value) data, $R Function(Error<T> value) error) {
     final self = this;
     if (self is Data<T>) return data(self);
     if (self is Error<T>) return error(self);
     throw StateError("Unexpected type : ${self.runtimeType}");
   }
 
-  R? match<R>(
-      {R? Function(Data<T> value)? data,
-      R? Function(Error<T> value)? error,
-      R? Function(Result<T> value)? otherwise}) {
+  $R? match<$R>(
+      {$R? Function(Data<T> value)? data,
+      $R? Function(Error<T> value)? error,
+      $R? Function(Result<T> value)? otherwise}) {
     final self = this;
     if (self is Data<T>) {
       if (data != null) return data(self);
@@ -36,6 +36,11 @@ extension $SealedResultApi<T extends num> on Result<T> {
     }
 
     return otherwise?.call(self);
+  }
+
+  $R? apply<$R, $U extends Result<T>>($R Function($U value) function) {
+    final self = this;
+    return (self is $U) ? function(self) : null;
   }
 
   bool get isData => this is Data<T>;
@@ -67,8 +72,7 @@ class _$Data<T extends num> with Data<T> {
             (identical(other.code, code) ||
                 const DeepCollectionEquality().equals(other.code, code)) &&
             (identical(other.value, value) ||
-                const DeepCollectionEquality()
-                    .equals(other.value, value)) &&
+                const DeepCollectionEquality().equals(other.value, value)) &&
             super == other);
   }
 

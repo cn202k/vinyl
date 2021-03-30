@@ -26,6 +26,7 @@ class SealedApiExtensionTemplate {
   Iterable<Method> methods() => [
         _MapMethod(model).inflate(),
         _MatchMethod(model).inflate(),
+        _ApplyMethod(model).infalte(),
         ...model.subtypes.map((it) => _IsMethod(it).infalte()),
         ...model.subtypes.map((it) => _AsMethod(it).infalte()),
       ];
@@ -59,7 +60,7 @@ class _MapMethod {
     return method.build();
   }
 
-  String returnType() => 'R';
+  String returnType() => r'$R';
 
   Iterable<Parameter> parameters() => model.subtypes.map(parameter);
 
@@ -124,7 +125,7 @@ class _MatchMethod {
     return method.build();
   }
 
-  String typeParameter() => 'R';
+  String typeParameter() => r'$R';
 
   String returnType() => typeParameter() + '?';
 
@@ -212,4 +213,43 @@ class _AsMethod {
   String returnType() => targetType() + '?';
 
   String targetType() => subtype.typeParameters.parameterize(subtype.name);
+}
+
+/*
+
+  $R? apply<$R, $U extends Result<T>>($R Function($U value) function) {
+    final self = this;
+    return (self is $U) ? function(self) : null;
+  }
+*/
+
+class _ApplyMethod {
+  final DataSupertype model;
+
+  _ApplyMethod(this.model);
+
+  Method infalte() {
+    final method = MethodBuilder()
+      ..name = 'apply'
+      ..returns = refer(r'$R?')
+      ..types.addAll([
+        refer(r'$R'),
+        refer('\$U extends ${targetType()}'),
+      ])
+      ..requiredParameters.add(
+        Parameter(
+          (param) => param
+            ..name = 'function'
+            ..type = refer(r'$R Function($U value)'),
+        ),
+      )
+      ..body = Code(r'''
+      final self = this;
+      return (self is $U) ? function(self) : null;
+      ''');
+    return method.build();
+  }
+
+  String targetType() => model.declaration.typeParameters
+      .parameterize(model.declaration.name);
 }

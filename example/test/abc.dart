@@ -19,4 +19,10 @@ void main() {
 
   final x = d.match(error: (it) => it.message);
   final v = d.asData?.value;
+
+  final q = copy(d()..code = 100);
+
+  final String? a = d.apply(doSomethingWithError);
 }
+
+String doSomethingWithError(Error<num> e) => e.message;
