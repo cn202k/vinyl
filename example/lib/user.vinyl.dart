@@ -170,15 +170,15 @@ class UserBuilder<T extends W> implements Builder<User<T>> {
 
   List<String>? favs;
 
-  set source(User<T> value) {
-    id = value.id;
-    gomgom = value.gomgom;
-    name = value.name;
-    mail = value.mail;
-    age = value.age;
-    size = value.size;
-    foo = value.foo?.toBuilder();
-    favs = value.favs;
+  set source(User<T> value$) {
+    id = value$.id;
+    gomgom = value$.gomgom;
+    name = value$.name;
+    mail = value$.mail;
+    age = value$.age;
+    size = value$.size;
+    foo = value$.foo?.toBuilder();
+    favs = value$.favs;
   }
 
   @override

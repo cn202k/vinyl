@@ -22,7 +22,7 @@ mixin Error<T> implements Result<T> {
 
 abstract class ResultBuilder<T, $T extends Result<T>>
     implements Builder<$T> {
-  set code(int value);
+  abstract int code;
 
   set source(covariant Result<T> value);
 

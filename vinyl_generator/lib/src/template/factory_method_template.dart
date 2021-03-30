@@ -5,7 +5,14 @@ import 'package:vinyl_generator/src/template/concrete_class_template.dart';
 class FactoryMethodTemplate {
   final DataType model;
 
-  FactoryMethodTemplate(this.model);
+  factory FactoryMethodTemplate(IDataType model) {
+    if (model is DataType) return FactoryMethodTemplate._(model);
+    if (model is DataSupertype) return FactoryMethodTemplate._(model.type);
+    if (model is DataSubtype) return FactoryMethodTemplate._(model.type);
+    throw Exception();
+  }
+
+  FactoryMethodTemplate._(this.model);
 
   String name() => 'new${model.name}';
 

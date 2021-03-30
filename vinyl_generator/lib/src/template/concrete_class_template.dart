@@ -6,7 +6,14 @@ import 'package:vinyl_generator/src/template/default_class_template.dart';
 class ConcreteClassTemplate {
   final DataType model;
 
-  ConcreteClassTemplate(this.model);
+  factory ConcreteClassTemplate(IDataType model) {
+    if (model is DataType) return ConcreteClassTemplate._(model);
+    if (model is DataSupertype) return ConcreteClassTemplate._(model.type);
+    if (model is DataSubtype) return ConcreteClassTemplate._(model.type);
+    throw Exception();
+  }
+
+  ConcreteClassTemplate._(this.model);
 
   Class inflate() {
     final klass = ClassBuilder()

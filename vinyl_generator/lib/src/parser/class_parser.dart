@@ -61,4 +61,17 @@ class ClassParser {
       typeChecker.firstAnnotationOf(element);
 
   bool isMixin() => element.isMixin;
+
+  Iterable<ClassParser> directSubtypesDeclaredInSameLibrary() =>
+      element.library.topLevelElements
+          .whereType<ClassElement>()
+          .where((klass) => klass.allSupertypes
+              .where((sup) => sup.element.id == element.id)
+              .isNotEmpty)
+          .map((klass) => ClassParser(klass));
+
+  Iterable<ClassParser> directSupertypesDeclaredInSameLibrary() =>
+      element.allSupertypes
+          .where((it) => it.element.library.id == element.library.id)
+          .map((it) => ClassParser(it.element));
 }

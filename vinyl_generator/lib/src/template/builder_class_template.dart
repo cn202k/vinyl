@@ -3,31 +3,67 @@ import 'package:vinyl_generator/src/model.dart';
 import 'package:vinyl_generator/src/template/concrete_class_template.dart';
 
 class BuilderClassTemplate {
+  final IDataType iModel;
   final DataType model;
 
-  BuilderClassTemplate(this.model);
+  factory BuilderClassTemplate(IDataType model) {
+    if (model is DataType) return BuilderClassTemplate._(model, model);
+    if (model is DataSupertype)
+      return BuilderClassTemplate._(model, model.type);
+    if (model is DataSubtype)
+      return BuilderClassTemplate._(model, model.type);
+    throw Exception();
+  }
+
+  BuilderClassTemplate._(this.iModel, this.model);
 
   Class inflate() {
     final klass = ClassBuilder()
       ..name = name()
       ..implements.add(interface())
       ..types.addAll(typeParameters())
-      // ..constructors.add(constructor())
-      ..constructors.add(_Constructor(model).inflate())
       ..fields.addAll(fields())
       ..methods.addAll([
-        _SourceMethod(model).inflate(),
-        _BuildMethod(model).inflate(),
+        _SourceMethod(iModel, model).inflate(),
+        _BuildMethod(iModel, model).inflate(),
       ]);
+
+    if (iModel is DataSupertype) {
+      klass.abstract = true;
+    } else {
+      klass.constructors.add(_Constructor(model).inflate());
+    }
     return klass.build();
   }
 
   String targetType() => model.typeParameters.parameterize(model.name);
 
-  Reference interface() => refer('DataBuilder<${targetType()}>');
+  // Reference interface() => refer('Builder<${targetType()}>');
+  Reference interface() {
+    final model = this.iModel;
+    if (model is DataType) return refer('Builder<${targetType()}>');
+    if (model is DataSupertype) return refer(r'Builder<$T>');
+    if (model is DataSubtype) {
+      final typeArgs = [
+        ...typeParameters().map((it) => it.symbol),
+        targetType(),
+      ].join(', ');
+      final supBuilder = BuilderClassTemplate(model.supertype).name();
+      return refer('$supBuilder<$typeArgs>');
+    }
+    throw Exception();
+  }
 
-  Iterable<Reference> typeParameters() =>
-      model.typeParameters.map((it) => refer('$it'));
+  // Iterable<Reference> typeParameters() =>
+  //     model.typeParameters.map((it) => refer('$it'));
+
+  Iterable<Reference> typeParameters() {
+    final params = model.typeParameters.map((it) => refer('$it')).toList();
+    if (iModel is DataSupertype) {
+      params.add(refer('\$T extends ${targetType()}'));
+    }
+    return params;
+  }
 
   String name() => '${model.name}Builder';
 
@@ -35,48 +71,52 @@ class BuilderClassTemplate {
 
   Reference fieldType(Property property) {
     final builder = property.builder;
-    if (builder == null) return refer(property.typeSource);
-    final type = property.typeArguments.parameterize(builder.name);
-    return property.isNullable ? refer('$type?') : refer(type);
+    late String type;
+    if (builder == null) {
+      type = property.typeSource;
+    } else {
+      type = property.typeArguments.parameterize(builder.name);
+      type = property.isNullable ? '$type?' : type;
+    }
+    if (iModel is DataSupertype) type = 'abstract $type';
+    return refer(type);
   }
 
   Field field(Property property) {
     final field = FieldBuilder()
       ..name = property.name
       ..type = fieldType(property);
+    if (iModel is DataSubtype) {
+      field.annotations.add(refer('override'));
+    }
     return field.build();
-  }
-
-  Constructor constructor() {
-    final ctor = ConstructorBuilder()
-      ..requiredParameters.addAll(
-        model.properties.map(
-          (prop) => Parameter(
-            (param) => param
-              ..name = prop.name
-              ..toThis = true,
-          ),
-        ),
-      );
-    return ctor.build();
   }
 }
 
 class _BuildMethod {
+  final IDataType iModel;
   final DataType model;
 
-  _BuildMethod(this.model);
+  _BuildMethod(this.iModel, this.model);
 
-  Reference returnType() =>
-      refer(model.typeParameters.parameterize(model.name));
+  // Reference returnType() =>
+  //     refer(model.typeParameters.parameterize(model.name));
+
+  Reference returnType() {
+    if (iModel is DataSupertype) return refer(r'$T');
+    return refer(model.typeParameters.parameterize(model.name));
+  }
 
   Method inflate() {
     final method = MethodBuilder()
       ..name = 'build'
       ..returns = returnType()
-      ..annotations.add(refer('override'))
-      ..lambda = true
-      ..body = bodyCode();
+      ..annotations.add(refer('override'));
+    if (iModel is! DataSupertype) {
+      method
+        ..lambda = true
+        ..body = bodyCode();
+    }
     return method.build();
   }
 
@@ -140,16 +180,19 @@ class _Constructor {
 }
 
 class _SourceMethod {
+  final IDataType iModel;
   final DataType model;
 
-  _SourceMethod(this.model);
+  _SourceMethod(this.iModel, this.model);
 
   Method inflate() {
     final method = MethodBuilder()
       ..name = name()
       ..type = MethodType.setter
-      ..requiredParameters.add(parameter())
-      ..body = bodyCode();
+      ..requiredParameters.add(parameter());
+    if (iModel is! DataSupertype) {
+      method.body = bodyCode();
+    }
     return method.build();
   }
 
@@ -160,19 +203,23 @@ class _SourceMethod {
   Reference parameterType() =>
       refer(model.typeParameters.parameterize(model.name));
 
+  String parameterName() => r'value$';
+
   Parameter parameter() => Parameter(
         (param) => param
-          ..name = 'value'
-          ..type = parameterType(),
+          ..name = parameterName()
+          ..type = parameterType()
+          ..covariant = iModel is DataSupertype,
       );
 
   String assignmentCode(Property property) {
+    final param = parameterName();
     final prop = property.name;
     final builder = property.builder;
-    if (builder == null) return '$prop = value.$prop;';
+    if (builder == null) return '$prop = $param.$prop;';
     final toBuilder = builder.toBuilderMethodName;
     return property.isNullable
-        ? '$prop = value.$prop?.$toBuilder();'
-        : '$prop = value.$prop.$toBuilder();';
+        ? '$prop = $param.$prop?.$toBuilder();'
+        : '$prop = $param.$prop.$toBuilder();';
   }
 }

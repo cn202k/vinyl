@@ -1,4 +1,34 @@
-class DataType {
+abstract class IDataType {
+  DataType get declaration;
+}
+
+class DataSupertype implements IDataType {
+  final DataType type;
+  final Iterable<DataType> subtypes;
+
+  DataSupertype({
+    required this.type,
+    required this.subtypes,
+  });
+
+  @override
+  DataType get declaration => type;
+}
+
+class DataSubtype implements IDataType {
+  final DataType type;
+  final DataType supertype;
+
+  DataSubtype({
+    required this.type,
+    required this.supertype,
+  });
+
+  @override
+  DataType get declaration => type;
+}
+
+class DataType implements IDataType {
   final String name;
   final Iterable<TypeParameter> typeParameters;
   final Iterable<Property> properties;
@@ -12,6 +42,9 @@ class DataType {
     required this.lazyProperties,
     required this.meta,
   });
+
+  @override
+  DataType get declaration => this;
 }
 
 class DataTypeMeta {

@@ -30,14 +30,26 @@ class VinylClassParser extends ClassParser {
   Iterable<VinylGetterParser> allExplicitGetters() =>
       lookUpAllExplicitGetters(accessibleFrom: element.library)
           .map((it) => VinylGetterParser._(it.element));
+
+  Iterable<VinylClassParser>
+      directVinylSubclassesDeclaredInSameLibrary() =>
+          directSubtypesDeclaredInSameLibrary()
+              .map((it) => VinylClassParser.from(it.element))
+              .whereType<VinylClassParser>();
+
+  Iterable<VinylClassParser>
+      directVinylSuperclassesDeclaredInSameLibrary() =>
+          directSupertypesDeclaredInSameLibrary()
+              .map((it) => VinylClassParser.from(it.element))
+              .whereType<VinylClassParser>();
 }
 
 class VinylGetterParser extends PropertyAccessorParser {
   VinylGetterParser._(PropertyAccessorElement getter) : super(getter);
 
   BuilderAnnotationParser? builderAnnotation() {
-    final DartObject? annotation =
-        const TypeChecker.fromRuntime(Buildable).firstAnnotationOf(element);
+    final DartObject? annotation = const TypeChecker.fromRuntime(Buildable)
+        .firstAnnotationOf(element);
     if (annotation == null) return null;
     return BuilderAnnotationParser._(annotation);
   }

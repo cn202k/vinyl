@@ -3,6 +3,6 @@
 TODO
 - [ ] Generate `stringify` method
 - [ ] Code refactoring
-- [ ] Support union type
+- [x] Support sealed class
 - [ ] Support `json_serialization`
 - [ ] Support `BuiltCollection`s

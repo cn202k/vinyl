@@ -7,11 +7,22 @@ import 'package:vinyl_generator/src/template/factory_method_template.dart';
 
 final _emitter = DartEmitter();
 
-String inflate(DataType model) => <Spec>[
-      ConcreteClassTemplate(model).inflate(),
-      FactoryMethodTemplate(model).inflate(),
-      if (model.properties.any((it) => it.hasDefaultValue))
-        DefaulClassTemplate(model).inflate(),
-      if (model.meta.shouldGenerateBuilder)
+// String inflate(DataType model) => <Spec>[
+//       ConcreteClassTemplate(model).inflate(),
+//       FactoryMethodTemplate(model).inflate(),
+//       if (model.properties.any((it) => it.hasDefaultValue))
+//         DefaulClassTemplate(model).inflate(),
+//       if (model.meta.shouldGenerateBuilder)
+//         BuilderClassTemplate(model).inflate(),
+//     ].map((it) => it.accept(_emitter).toString()).join('\n\n');
+
+String inflate(IDataType model) => <Spec>[
+      if (model is! DataSupertype) ...[
+        ConcreteClassTemplate(model).inflate(),
+        FactoryMethodTemplate(model).inflate(),
+        if (model.declaration.properties.any((it) => it.hasDefaultValue))
+          DefaulClassTemplate(model).inflate(),
+      ],
+      if (model.declaration.meta.shouldGenerateBuilder)
         BuilderClassTemplate(model).inflate(),
     ].map((it) => it.accept(_emitter).toString()).join('\n\n');
