@@ -1,28 +1,11 @@
 import 'package:code_builder/code_builder.dart';
 import 'package:vinyl_generator/src/model.dart';
 import 'package:vinyl_generator/src/template/concrete_class_template.dart';
-import 'package:vinyl_generator/src/template/default_class_template.dart';
 
-class FactoryExtensionTemplate {
+class FactoryMethodTemplate {
   final DataType model;
 
-  FactoryExtensionTemplate(this.model);
-
-  Extension inflate() {
-    final ext = ExtensionBuilder()
-      ..name = name()
-      ..on = refer('Vinyl')
-      ..methods.add(FactoryMethod(model).inflate());
-    return ext.build();
-  }
-
-  String name() => '${model.name}Factory';
-}
-
-class FactoryMethod {
-  final DataType model;
-
-  FactoryMethod(this.model);
+  FactoryMethodTemplate(this.model);
 
   String name() => 'new${model.name}';
 

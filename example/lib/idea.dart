@@ -31,10 +31,9 @@ abstract class ResultBuilder<T, $T extends Result<T>>
 }
 
 class SuccessfulBuilder<T> implements ResultBuilder<T, Successful<T>> {
-  @override
-  set code(int value) {
-    // TODO: implement code
-  }
+  int code;
+
+  SuccessfulBuilder(this.code);
 
   @override
   set source(Successful<T> value) {
@@ -46,10 +45,9 @@ class SuccessfulBuilder<T> implements ResultBuilder<T, Successful<T>> {
 }
 
 class ErrorBuilder<T> implements ResultBuilder<T, Error<T>> {
-  @override
-  set code(int value) {
-    // TODO: implement code
-  }
+  int code;
+
+  ErrorBuilder(this.code);
 
   @override
   set source(Successful<T> value) {
